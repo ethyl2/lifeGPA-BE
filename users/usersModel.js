@@ -4,6 +4,7 @@ module.exports = {
   updateUser,
   removeUser,
   getUsers,
+  findBy,
 };
 
 const db = require('../data/db-config.js');
@@ -33,6 +34,10 @@ async function addUser(newUser) {
 
 function findUserById(id) {
   return db('users').where({ id: id }).first();
+}
+
+function findBy(filter) {
+  return db('users').where(filter);
 }
 
 function updateUser(id, updatedUser) {

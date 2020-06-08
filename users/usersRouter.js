@@ -2,6 +2,7 @@ const express = require('express');
 const Users = require('./usersModel.js');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 router.get('/', (req, res) => {
   res.status(200).send('Welcome to the Users Router! 🐣');
@@ -46,4 +47,50 @@ router.post('/register', (req, res) => {
       res.status(500).json({ error: err, message: 'Failure to add new user.' });
     });
 });
+
+router.post('/login', (req, res) => {
+  let { username, password } = req.body;
+  Users.findBy({ username })
+    .first()
+    .then((user) => {
+      if (user && bcrypt.compareSync(password, user.password)) {
+        const token = generateToken(user);
+        const user_to_return = {
+          id: user.id,
+          username: user.username,
+          name: user.name,
+          email: user.email,
+        };
+        res.status(200).json({
+          message: `Welcome, ${user.name}`,
+          status: 'Logged in',
+          token: token,
+          user_info: user_to_return,
+        });
+      } else {
+        res.status(401).json({
+          error: 'invalid credentials',
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: 'Unsuccessful login',
+      });
+    });
+});
+
+function generateToken(user) {
+  const payload = {
+    subject: user.id,
+    username: user.username,
+  };
+  const secret =
+    process.env.JWT_SECRET || 'become a little bit better everyday';
+  const options = {
+    expiresIn: '1d',
+  };
+  return jwt.sign(payload, secret, options);
+}
 module.exports = router;
