@@ -3,12 +3,14 @@ const Users = require('./usersModel.js');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const restricted = require('../auth/authMiddleware.js');
+require('dotenv').config();
 
 router.get('/', (req, res) => {
   res.status(200).send('Welcome to the Users Router! 🐣');
 });
 
-router.get('/all', (req, res) => {
+router.get('/all', restricted, (req, res) => {
   Users.getUsers()
     .then((users) => {
       const usersList = users.map((user) => {
