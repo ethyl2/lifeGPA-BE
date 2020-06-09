@@ -83,6 +83,21 @@ router.post('/login', (req, res) => {
     });
 });
 
+// Edit user
+router.put('/:id', restricted, (req, res) => {
+  const id = req.params.id;
+  Users.updateUser(id, req.body)
+    .then((user) => {
+      res.status(200).json(user);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failed to update user with id ${id}.`,
+      });
+    });
+});
+
 // Delete user
 
 router.delete('/:id', restricted, (req, res) => {
@@ -94,11 +109,9 @@ router.delete('/:id', restricted, (req, res) => {
           message: `Successfully deleted user with id ${id}`,
         });
       } else {
-        res
-          .status(404)
-          .json({
-            message: `Failed to find user with id ${id} and therefore failed to delete user.`,
-          });
+        res.status(404).json({
+          message: `Failed to find user with id ${id} and therefore failed to delete user.`,
+        });
       }
     })
     .catch((err) => {
