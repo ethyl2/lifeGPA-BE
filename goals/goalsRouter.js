@@ -33,6 +33,21 @@ router.post('/new', restricted, (req, res) => {
     });
 });
 
+// Update a goal
+router.put('/:id', restricted, (req, res) => {
+  const id = req.params.id;
+  Goals.updateGoal(id, req.body)
+    .then((goal) => {
+      res.status(200).json(goal);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failed to update goal with id ${id}`,
+      });
+    });
+});
+
 // Connect a user to a goal.
 // This returns all of a user's goals.
 router.post('/:user_id/:goal_id', restricted, (req, res) => {

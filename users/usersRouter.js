@@ -83,6 +83,31 @@ router.post('/login', (req, res) => {
     });
 });
 
+// Delete user
+
+router.delete('/:id', restricted, (req, res) => {
+  const { id } = req.params;
+  Users.removeUser(id)
+    .then((deleted) => {
+      if (deleted) {
+        res.status(200).json({
+          message: `Successfully deleted user with id ${id}`,
+        });
+      } else {
+        res
+          .status(404)
+          .json({
+            message: `Failed to find user with id ${id} and therefore failed to delete user.`,
+          });
+      }
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ error: err, message: `Failed to delete user with id ${id}.` });
+    });
+});
+
 function generateToken(user) {
   const payload = {
     subject: user.id,

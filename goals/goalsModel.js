@@ -1,7 +1,7 @@
 module.exports = {
   addGoal,
   findGoalById,
-  //updateGoal,
+  updateGoal,
   getGoals,
   //findBy,
   connectGoalToUser,
@@ -46,4 +46,13 @@ function getUsersGoals(user_id) {
 
 function disconnectGoalToUser(user_id, goal_id) {
   return db('connections').where({ user_id: user_id, goal_id: goal_id }).del();
+}
+
+function updateGoal(id, new_info) {
+  return db('goals')
+    .where({ id })
+    .update(new_info)
+    .then(() => {
+      return findGoalById(id);
+    });
 }
