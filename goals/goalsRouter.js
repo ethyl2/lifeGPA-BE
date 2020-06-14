@@ -112,36 +112,81 @@ router.get('/user/:user_id', restricted, (req, res) => {
 
 // Add a success (to show whether a user did a specified goal on a specified date)
 // Success is a boolean
-router.post('/:user_id/:goal_id/success', restricted, (req, res) => {
+router.post(
+  '/:user_id/:goal_id/success',
+  restricted,
+  checkForDuplicateSuccess,
+  (req, res) => {
+    const user_id = req.params.user_id;
+    const goal_id = req.params.goal_id;
+    const { date, success } = req.body;
+
+    Goals.getConnection(user_id, goal_id)
+      .then((connection) => {
+        Goals.addSuccess(connection.id, date, success)
+          .then((response) => {
+            const successText = success ? 'was' : "wasn't";
+            res.status(201).json({
+              message: `User ${user_id} ${successText} able to do goal ${goal_id} on ${date}.`,
+              success: success,
+              successes_id: response[0],
+            });
+          })
+          .catch((err) => {
+            res.status(500).json({
+              error: err,
+              message: `Failed to add record to show that user ${user_id} ${successText} able to do goal ${goal_id} on ${date}.`,
+              date: date,
+              success: success,
+              connections_id: connection.id,
+            });
+          });
+      })
+      .catch((error) => {
+        res.status(500).json({
+          error: error,
+          message: `Failed to get connection between user ${user_id} and ${goal_id}`,
+        });
+      });
+  }
+);
+
+function checkForDuplicateSuccess(req, res, next) {
   const user_id = req.params.user_id;
   const goal_id = req.params.goal_id;
   const { date, success } = req.body;
-
-  Goals.getConnection(user_id, goal_id)
+  Goals.getSuccessGivenParams(user_id, goal_id, date)
     .then((connection) => {
-      Goals.addSuccess(connection.id, date, success)
-        .then((response) => {
-          const successText = success ? 'was' : "wasn't";
-          res.status(201).json({
-            message: `User ${user_id} ${successText} able to do goal ${goal_id} on ${date}.`,
-            success: success,
-            successes_id: response[0],
-          });
-        })
-        .catch((err) => {
-          res.status(500).json({
-            error: err,
-            message: `Failed to add record to show that user ${user_id} {successText} able to do goal ${goal_id} on ${date}.`,
-            date: date,
-            success: success,
-            connections_id: connection.id,
-          });
+      if (connection) {
+        res.status(500).json({
+          message:
+            'The success/fail entry for specified user/goal/date already exists.',
+          existing_entry: connection,
         });
+      } else {
+        next();
+      }
     })
-    .catch((error) => {
+    .catch((err) => {
+      console.log(err);
+    });
+}
+
+router.put('/:user_id/:goal_id/success', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const goal_id = req.params.goal_id;
+  const { date, success } = req.body;
+  Goals.updateSuccess(user_id, goal_id, date, success)
+    .then((response) => {
+      res.status(200).json({
+        response: response,
+        message: `Successfully updated success/fail for user ${user_id}, goal ${goal_id}.`,
+      });
+    })
+    .catch((err) => {
       res.status(500).json({
-        error: error,
-        message: `Failed to get connection between user ${user_id} and ${goal_id}`,
+        error: err,
+        message: `Failure to update success/fail for user ${user_id} with goal ${goal_id}.`,
       });
     });
 });

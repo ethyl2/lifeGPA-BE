@@ -9,7 +9,7 @@ exports.up = function (knex) {
       .inTable('connections')
       .onUpdate('CASCADE')
       .onDelete('RESTRICT');
-    tbl.timestamp('date').notNullable();
+    tbl.date('date').notNullable();
     tbl.boolean('success').notNullable();
   });
 };

@@ -10,6 +10,8 @@ module.exports = {
   addSuccess,
   getConnection,
   getSuccess,
+  getSuccessGivenParams,
+  updateSuccess,
 };
 
 const db = require('../data/db-config.js');
@@ -76,4 +78,18 @@ function addSuccess(connections_id, date, success) {
 
 function getSuccess(success_id) {
   return db('successes').where({ id: success_id }).first();
+}
+
+async function getSuccessGivenParams(user_id, goal_id, date) {
+  const connection = await getConnection(user_id, goal_id);
+  return db('successes')
+    .where({ connections_id: connection.id, date: date })
+    .first();
+}
+
+async function updateSuccess(user_id, goal_id, date, success) {
+  const success_entry = await getSuccessGivenParams(user_id, goal_id, date);
+  return db('successes')
+    .where({ id: success_entry.id })
+    .update({ success: success });
 }
