@@ -68,9 +68,10 @@ function getConnection(user_id, goal_id) {
     .first();
 }
 
-function addSuccess(connections_id, date, success) {
+async function addSuccess(user_id, goal_id, date, success) {
+  const connection = await getConnection(user_id, goal_id);
   return db('successes').insert({
-    connections_id: connections_id,
+    connections_id: connection.id,
     date: date,
     success: success,
   });
