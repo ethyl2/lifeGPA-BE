@@ -7,6 +7,9 @@ module.exports = {
   connectGoalToUser,
   getUsersGoals,
   disconnectGoalToUser,
+  addSuccess,
+  getConnection,
+  getSuccess,
 };
 
 const db = require('../data/db-config.js');
@@ -55,4 +58,22 @@ function updateGoal(id, new_info) {
     .then(() => {
       return findGoalById(id);
     });
+}
+
+function getConnection(user_id, goal_id) {
+  return db('connections')
+    .where({ user_id: user_id, goal_id: goal_id })
+    .first();
+}
+
+function addSuccess(connections_id, date, success) {
+  return db('successes').insert({
+    connections_id: connections_id,
+    date: date,
+    success: success,
+  });
+}
+
+function getSuccess(success_id) {
+  return db('successes').where({ id: success_id }).first();
 }

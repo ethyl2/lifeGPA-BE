@@ -110,4 +110,40 @@ router.get('/user/:user_id', restricted, (req, res) => {
     });
 });
 
+// Add a success (to show whether a user did a specified goal on a specified date)
+// Success is a boolean
+router.post('/:user_id/:goal_id/success', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const goal_id = req.params.goal_id;
+  const { date, success } = req.body;
+
+  Goals.getConnection(user_id, goal_id)
+    .then((connection) => {
+      Goals.addSuccess(connection.id, date, success)
+        .then((response) => {
+          const successText = success ? 'was' : "wasn't";
+          res.status(201).json({
+            message: `User ${user_id} ${successText} able to do goal ${goal_id} on ${date}.`,
+            success: success,
+            successes_id: response[0],
+          });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            error: err,
+            message: `Failed to add record to show that user ${user_id} {successText} able to do goal ${goal_id} on ${date}.`,
+            date: date,
+            success: success,
+            connections_id: connection.id,
+          });
+        });
+    })
+    .catch((error) => {
+      res.status(500).json({
+        error: error,
+        message: `Failed to get connection between user ${user_id} and ${goal_id}`,
+      });
+    });
+});
+
 module.exports = router;
