@@ -3,8 +3,7 @@ require('dotenv').config();
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
-  const secret =
-    process.env.JWT_SECRET || 'become a little bit better everyday';
+  const secret = process.env.JWT_SECRET;
   if (authorization) {
     jwt.verify(authorization, secret, function (err, decodedToken) {
       if (err) {

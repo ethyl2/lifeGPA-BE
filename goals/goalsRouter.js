@@ -181,4 +181,20 @@ router.put('/:user_id/:goal_id/success', restricted, (req, res) => {
     });
 });
 
+// To get every success/fail entry for a given user with a given goal
+router.get('/:user_id/:goal_id/history', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const goal_id = req.params.goal_id;
+  Goals.getSuccessesForUserAndGoal(user_id, goal_id)
+    .then((response) => {
+      res.status(200).json(response);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failure to get successes history for user ${user_id} with goal ${goal_id}.`,
+      });
+    });
+});
+
 module.exports = router;

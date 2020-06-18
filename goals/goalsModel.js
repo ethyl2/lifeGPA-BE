@@ -12,6 +12,7 @@ module.exports = {
   getSuccess,
   getSuccessGivenParams,
   updateSuccess,
+  getSuccessesForUserAndGoal,
 };
 
 const db = require('../data/db-config.js');
@@ -93,4 +94,10 @@ async function updateSuccess(user_id, goal_id, date, success) {
   return db('successes')
     .where({ id: success_entry.id })
     .update({ success: success });
+}
+
+// To return every entry for a given user with a given goal
+async function getSuccessesForUserAndGoal(user_id, goal_id) {
+  const connection = await getConnection(user_id, goal_id);
+  return db('successes').where({ connections_id: connection.id });
 }
