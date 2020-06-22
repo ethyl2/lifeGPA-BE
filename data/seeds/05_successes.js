@@ -1,0 +1,58 @@
+exports.seed = function (knex) {
+  // Deletes ALL existing entries
+  return knex('successes').then(function () {
+    // Inserts seed entries
+    return knex('successes').insert([
+      { connections_id: 1, date: '2020-06-10', success: true },
+      { connections_id: 1, date: '2020-06-11', success: false },
+      { connections_id: 1, date: '2020-06-12', success: true },
+      { connections_id: 1, date: '2020-06-13', success: true },
+      { connections_id: 1, date: '2020-06-14', success: true },
+      { connections_id: 1, date: '2020-06-15', success: false },
+      { connections_id: 1, date: '2020-06-16', success: true },
+      { connections_id: 1, date: '2020-06-17', success: true },
+      { connections_id: 1, date: '2020-06-18', success: true },
+      { connections_id: 1, date: '2020-06-19', success: false },
+      { connections_id: 1, date: '2020-06-20', success: true },
+      { connections_id: 1, date: '2020-06-21', success: true },
+      { connections_id: 1, date: '2020-06-22', success: true },
+      { connections_id: 6, date: '2020-06-20', success: true },
+      { connections_id: 6, date: '2020-06-21', success: true },
+      { connections_id: 6, date: '2020-06-22', success: false },
+
+      { connections_id: 8, date: '2020-06-10', success: true },
+      { connections_id: 8, date: '2020-06-11', success: false },
+      { connections_id: 8, date: '2020-06-12', success: true },
+      { connections_id: 8, date: '2020-06-13', success: false },
+      { connections_id: 8, date: '2020-06-14', success: true },
+      { connections_id: 8, date: '2020-06-15', success: true },
+      { connections_id: 8, date: '2020-06-16', success: true },
+      { connections_id: 8, date: '2020-06-17', success: true },
+      { connections_id: 8, date: '2020-06-18', success: false },
+      { connections_id: 8, date: '2020-06-19', success: false },
+      { connections_id: 8, date: '2020-06-20', success: true },
+      { connections_id: 8, date: '2020-06-21', success: false },
+      { connections_id: 8, date: '2020-06-22', success: true },
+      { connections_id: 10, date: '2020-06-20', success: false },
+      { connections_id: 10, date: '2020-06-21', success: true },
+      { connections_id: 10, date: '2020-06-22', success: false },
+
+      { connections_id: 13, date: '2020-06-10', success: true },
+      { connections_id: 13, date: '2020-06-11', success: true },
+      { connections_id: 13, date: '2020-06-12', success: false },
+      { connections_id: 13, date: '2020-06-13', success: true },
+      { connections_id: 13, date: '2020-06-14', success: true },
+      { connections_id: 13, date: '2020-06-15', success: false },
+      { connections_id: 13, date: '2020-06-16', success: true },
+      { connections_id: 13, date: '2020-06-17', success: false },
+      { connections_id: 13, date: '2020-06-18', success: false },
+      { connections_id: 13, date: '2020-06-19', success: false },
+      { connections_id: 13, date: '2020-06-20', success: true },
+      { connections_id: 13, date: '2020-06-21', success: true },
+      { connections_id: 13, date: '2020-06-22', success: true },
+      { connections_id: 16, date: '2020-06-13', success: true },
+      { connections_id: 16, date: '2020-06-14', success: true },
+      { connections_id: 16, date: '2020-06-22', success: true },
+    ]);
+  });
+};
