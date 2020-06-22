@@ -13,6 +13,7 @@ module.exports = {
   getSuccessGivenParams,
   updateSuccess,
   getSuccessesForUserAndGoal,
+  getCategories,
 };
 
 const db = require('../data/db-config.js');
@@ -100,4 +101,9 @@ async function updateSuccess(user_id, goal_id, date, success) {
 async function getSuccessesForUserAndGoal(user_id, goal_id) {
   const connection = await getConnection(user_id, goal_id);
   return db('successes').where({ connections_id: connection.id });
+}
+
+/* Category Queries*/
+function getCategories() {
+  return db('categories');
 }

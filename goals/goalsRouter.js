@@ -197,4 +197,20 @@ router.get('/:user_id/:goal_id/history', restricted, (req, res) => {
     });
 });
 
+/* Categories' Endpoints */
+
+// GET /goals/categories
+router.get('/categories', restricted, (req, res) => {
+  Goals.getCategories()
+    .then((categories) => {
+      res.status(200).json(categories);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: 'Failed to retrieve categories',
+      });
+    });
+});
+
 module.exports = router;
