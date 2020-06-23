@@ -235,13 +235,28 @@ router.put('/categories/:category_id', restricted, (req, res) => {
   const new_info = req.body;
   const id = req.params.category_id;
   Goals.updateCategory(id, new_info)
-    .then((category) => {
-      res.status(200).json(category);
+    .then((categories) => {
+      res.status(200).json(categories);
     })
     .catch((err) => {
       res.status(500).json({
         error: err,
         message: `Failed to update category with id ${id}.`,
+      });
+    });
+});
+
+// DEL /goals/categories/category/:category_id
+router.delete('/categories/category/:category_id', restricted, (req, res) => {
+  const id = req.params.category_id;
+  Goals.removeCategory(id)
+    .then((categories) => {
+      res.status(200).json(categories);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failed to delete category with id ${id}.`,
       });
     });
 });
