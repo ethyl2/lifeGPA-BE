@@ -214,6 +214,8 @@ router.get('/categories', restricted, (req, res) => {
 });
 
 // POST /goals/categories
+// Add a new category
+// Returns all of the categories
 router.post('/categories', restricted, (req, res) => {
   const category = req.body; // Needs 'title' and optionally, 'description'
   Goals.addCategory(category)
@@ -228,4 +230,19 @@ router.post('/categories', restricted, (req, res) => {
     });
 });
 
+// PUT /goals/categories/:category_id
+router.put('/categories/:category_id', restricted, (req, res) => {
+  const new_info = req.body;
+  const id = req.params.category_id;
+  Goals.updateCategory(id, new_info)
+    .then((category) => {
+      res.status(200).json(category);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failed to update category with id ${id}.`,
+      });
+    });
+});
 module.exports = router;
