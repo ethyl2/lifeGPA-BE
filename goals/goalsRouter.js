@@ -213,4 +213,19 @@ router.get('/categories', restricted, (req, res) => {
     });
 });
 
+// POST /goals/categories
+router.post('/categories', restricted, (req, res) => {
+  const category = req.body; // Needs 'title' and optionally, 'description'
+  Goals.addCategory(category)
+    .then((categories) => {
+      res.status(200).json(categories);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failed to add category ${category.title}`,
+      });
+    });
+});
+
 module.exports = router;

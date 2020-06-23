@@ -14,6 +14,7 @@ module.exports = {
   updateSuccess,
   getSuccessesForUserAndGoal,
   getCategories,
+  addCategory,
 };
 
 const db = require('../data/db-config.js');
@@ -106,4 +107,9 @@ async function getSuccessesForUserAndGoal(user_id, goal_id) {
 /* Category Queries*/
 function getCategories() {
   return db('categories');
+}
+
+async function addCategory(newCategory) {
+  const ids = await db('categories').insert(newCategory, 'id');
+  return getCategories();
 }
