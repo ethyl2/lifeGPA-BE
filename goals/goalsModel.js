@@ -22,7 +22,15 @@ module.exports = {
 const db = require('../data/db-config.js');
 
 function getGoals() {
-  return db('goals');
+  return db('goals')
+    .join('categories', 'category_id', '=', 'categories.id')
+    .select(
+      'goals.id',
+      'goals.title',
+      'goals.description',
+      'goals.category_id',
+      'categories.title AS category_title'
+    );
 }
 
 function addGoal(newGoal) {
