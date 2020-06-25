@@ -59,7 +59,16 @@ function connectGoalToUser(user_id, goal_id) {
 function getUsersGoals(user_id) {
   return db('connections')
     .where({ user_id: user_id })
-    .join('goals', 'goals.id', 'connections.goal_id');
+    .join('goals', 'goals.id', 'connections.goal_id')
+    .join('categories', 'goals.category_id', '=', 'categories.id')
+    .select(
+      'connections.id AS connection_id',
+      'goals.id AS goal_id',
+      'goals.category_id AS category_id',
+      'goals.title',
+      'goals.description',
+      'categories.title AS category_title'
+    );
 }
 
 function disconnectGoalToUser(user_id, goal_id) {
