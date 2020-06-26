@@ -6,10 +6,13 @@ const jwt = require('jsonwebtoken');
 const restricted = require('../auth/authMiddleware.js');
 require('dotenv').config();
 
+// GET /api/users
 router.get('/', (req, res) => {
   res.status(200).send('Welcome to the Users Router! 🐣');
 });
 
+// GET /api/users/all
+// Get id, username, name, and email of all users
 router.get('/all', restricted, (req, res) => {
   Users.getUsers()
     .then((users) => {
@@ -31,6 +34,9 @@ router.get('/all', restricted, (req, res) => {
     });
 });
 
+/* Onboarding */
+
+// POST /api/users/register
 router.post('/register', (req, res) => {
   let user = req.body;
   const hash = bcrypt.hashSync(user.password, 12);
@@ -50,6 +56,7 @@ router.post('/register', (req, res) => {
     });
 });
 
+// POST api/users/login
 router.post('/login', (req, res) => {
   let { username, password } = req.body;
   Users.findBy({ username })
@@ -84,11 +91,18 @@ router.post('/login', (req, res) => {
 });
 
 // Edit user
+// PUT api/users/:id
 router.put('/:id', restricted, (req, res) => {
   const id = req.params.id;
   Users.updateUser(id, req.body)
     .then((user) => {
-      res.status(200).json(user);
+      const user_to_return = {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+      };
+      res.status(200).json(user_to_return);
     })
     .catch((err) => {
       res.status(500).json({
@@ -99,7 +113,7 @@ router.put('/:id', restricted, (req, res) => {
 });
 
 // Delete user
-
+// DELETE /api/users/:id
 router.delete('/:id', restricted, (req, res) => {
   const { id } = req.params;
   Users.removeUser(id)
