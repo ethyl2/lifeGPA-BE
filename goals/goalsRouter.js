@@ -7,6 +7,8 @@ router.get('/', (req, res) => {
   res.status(200).send('Welcome to the Goals Router! 💡');
 });
 
+/* General goal endpoints (not specific to a user) */
+
 router.get('/all', restricted, (req, res) => {
   Goals.getGoals()
     .then((goals) => {
@@ -47,6 +49,8 @@ router.put('/:id', restricted, (req, res) => {
       });
     });
 });
+
+/* User-Goal Connection Endpoints */
 
 // Connect a user to a goal.
 // This returns all of a user's goals.
@@ -282,7 +286,7 @@ router.get('/:user_id/:goal_id/history', restricted, (req, res) => {
     });
 });
 
-/* Categories' Endpoints */
+/* General Categories' Endpoints */
 
 // GET /goals/categories
 router.get('/categories', restricted, (req, res) => {
