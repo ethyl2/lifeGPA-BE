@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const UsersRouter = require('../users/usersRouter.js');
 const GoalsRouter = require('../goals/goalsRouter.js');
 const CategoriesRouter = require('../categories/categoriesRouter.js');
+const ConnectionsRouter = require('../connections/connectionsRouter.js');
 
 const server = express();
 server.use(express.json());
@@ -15,5 +16,5 @@ server.use(cors());
 server.use('/api/users', UsersRouter);
 server.use('/api/goals', GoalsRouter);
 server.use('/api/categories', CategoriesRouter);
-
+server.use('/api/connections', ConnectionsRouter);
 module.exports = server;
