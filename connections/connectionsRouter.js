@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const restricted = require('../auth/authMiddleware.js');
 const Goals = require('../goals/goalsModel.js');
+const Connections = require('./connectionsModel.js');
 
 /* User-Goal Connection Endpoints */
 
@@ -10,11 +11,12 @@ router.get('/', (req, res) => {
 });
 
 // Connect a user to a goal.
-// This returns all of a user's goals.
+// This returns all of a user's goals. <- Change this later to only return new connection if desired.
+// POST /api/connections/:user_id/:goal_id
 router.post('/:user_id/:goal_id', restricted, (req, res) => {
   const user_id = req.params.user_id;
   const goal_id = req.params.goal_id;
-  Goals.connectGoalToUser(user_id, goal_id)
+  Connections.connectGoalToUser(user_id, goal_id)
     .then((goals) => {
       res.status(201).json(goals);
     })
@@ -28,13 +30,14 @@ router.post('/:user_id/:goal_id', restricted, (req, res) => {
 
 // Disconnect a user from a goal.
 // This returns the updated goals that are connected to a user.
+// DELETE /api/connections/:user_id/:goal_id
 
 router.delete('/:user_id/:goal_id', restricted, (req, res) => {
   const user_id = req.params.user_id;
   const goal_id = req.params.goal_id;
-  Goals.disconnectGoalToUser(user_id, goal_id)
+  Connections.disconnectGoalToUser(user_id, goal_id)
     .then((response) => {
-      Goals.getUsersGoals(user_id)
+      Connections.getUsersGoals(user_id)
         .then((goals) => {
           res.status(200).json({
             message: `Deleted goal with id ${goal_id} from user with id ${user_id}.`,
@@ -57,9 +60,10 @@ router.delete('/:user_id/:goal_id', restricted, (req, res) => {
 });
 
 // Get all of a user's goals
-router.get('/user/:user_id', restricted, (req, res) => {
+// GET api/connections/:user_id
+router.get('/:user_id', restricted, (req, res) => {
   const user_id = req.params.user_id;
-  Goals.getUsersGoals(user_id)
+  Connections.getUsersGoals(user_id)
     .then((goals) => {
       res.status(200).json(goals);
     })
@@ -72,9 +76,10 @@ router.get('/user/:user_id', restricted, (req, res) => {
 });
 
 // Get all of the categories of a user's goals
-router.get('/user/:user_id/categories', restricted, (req, res) => {
+// GET /api/connections/:user_id/categories
+router.get('/:user_id/categories', restricted, (req, res) => {
   const user_id = req.params.user_id;
-  Goals.getUsersCategories(user_id)
+  Connections.getUsersCategories(user_id)
     .then((categories) => {
       res.status(200).json(categories);
     })
@@ -87,10 +92,11 @@ router.get('/user/:user_id/categories', restricted, (req, res) => {
 });
 
 // Get a user's goals in specified category
-router.get('/user/:user_id/:category_id', restricted, (req, res) => {
+// Get /api/connections/:user_id/:category_id
+router.get('/:user_id/:category_id', restricted, (req, res) => {
   const user_id = req.params.user_id;
   const category_id = req.params.category_id;
-  Goals.getUsersGoalsByCategory(user_id, category_id)
+  Connections.getUsersGoalsByCategory(user_id, category_id)
     .then((goals) => {
       res.status(200).json(goals);
     })
@@ -102,32 +108,15 @@ router.get('/user/:user_id/:category_id', restricted, (req, res) => {
     });
 });
 
-// Get all of the categories that a user has goals in.
-router.get('/user/:user_id/categories', restricted, (req, res) => {
-  const user_id = req.params.user_id;
-  Goals.getUsersCategories(user_id)
-    .then((categories) => {
-      res.status(200).json({
-        response: categories,
-        message: `Categories for user ${user_id}`,
-      });
-    })
-    .catch((err) => {
-      res.status(500).json({
-        error: err,
-        message: `Failed to retrieve user ${user_id}'s categories.`,
-      });
-    });
-});
-
-// Get all of a user's goals, grouped by category
-router.get('/user/:user_id/categories/all', restricted, (req, res) => {
+// Get all of a user's categories with all of the goals in each category.
+// GET /api/connections/:user_id/categories/complete
+router.get('/:user_id/categories/complete', restricted, (req, res) => {
   const goals = [];
   const user_id = req.params.user_id;
-  Goals.getUsersCategories(user_id)
+  Connections.getUsersCategories(user_id)
     .then((categories) => {
       categories.map((category) => {
-        Goals.getUsersGoalsByCategory(user_id, category.category_id)
+        Connections.getUsersGoalsByCategory(user_id, category.category_id)
           .then((response) => {
             goals.push({
               category_id: category.category_id,
