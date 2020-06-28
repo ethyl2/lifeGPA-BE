@@ -24,7 +24,7 @@ router.get('/all', restricted, (req, res) => {
 
 // Add a goal. Note: this DOESN'T connect a goal to a specific user
 // It returns the new goal.
-router.post('/new', restricted, (req, res) => {
+router.post('/', restricted, (req, res) => {
   const goal = req.body; // Needs 'title' and optionally, 'description'
   Goals.addGoal(goal)
     .then((added_goal) => {
