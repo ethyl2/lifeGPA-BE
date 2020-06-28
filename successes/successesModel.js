@@ -7,6 +7,7 @@ module.exports = {
   updateSuccess,
   getSuccessesForUserAndGoal,
   getSuccessesForUser,
+  getCountSuccessesForUserAndGoal,
 };
 
 const db = require('../data/db-config.js');
@@ -56,6 +57,13 @@ async function getSuccessesForUserAndGoal(user_id, goal_id) {
   return db('successes')
     .where({ connections_id: connection.id })
     .orderBy('date');
+}
+
+async function getCountSuccessesForUserAndGoal(user_id, goal_id) {
+  const connection = await getConnection(user_id, goal_id);
+  return db('successes')
+    .where({ connections_id: connection.id, success: 1 })
+    .count('id as total_successes');
 }
 
 // To return every success/fail entry for a given user

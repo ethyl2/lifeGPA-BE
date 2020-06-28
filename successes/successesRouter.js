@@ -235,4 +235,25 @@ router.get('/:user_id/:goal_id/all', restricted, (req, res) => {
     });
 });
 
+// To get statistics for a given user with a given goal
+// GET /api/successes/:user_id/:goal_id/stats
+router.get('/:user_id/:goal_id/stats', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const goal_id = req.params.goal_id;
+  Successes.getCountSuccessesForUserAndGoal(user_id, goal_id)
+    .then((response) => {
+      res.status(200).json({
+        user_id: user_id,
+        goal_id: goal_id,
+        total_successes: response[0]['total_successes'],
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failure to get goal stats for user ${user_id} with goal ${goal_id}.`,
+      });
+    });
+});
+
 module.exports = router;
