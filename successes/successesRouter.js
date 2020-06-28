@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const restricted = require('../auth/authMiddleware.js');
 const Successes = require('./successesModel.js');
+const Connections = require('../connections/connectionsModel.js');
 
 router.get('/', (req, res) => {
   res.status(200).send('Welcome to the Successes Router! 🏆');
@@ -85,6 +86,59 @@ router.put('/:user_id/:goal_id', restricted, (req, res) => {
         message: `Failure to update success/fail for user ${user_id} with goal ${goal_id} and date ${date}.`,
       });
     });
+});
+
+// Get all of the success/fail entries for a given user
+// GET /api/successes/:user_id
+
+router.get('/:user_id', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  Successes.getSuccessesForUser(user_id)
+    .then((response) => {
+      res.status(200).json(response);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failure to get success/fail entries for user ${user_id}.`,
+      });
+    });
+});
+
+// Get all success/fail entries for a given user, grouped by goal
+// GET /api/succcesses/:user_id/goals
+router.get('/:user_id/goals', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const successes_by_goal = [];
+  Connections.getUsersGoals(user_id)
+    .then((goals) => {
+      goals.map((goal) => {
+        Successes.getSuccessesGivenConnection(goal.connection_id)
+          .then((successes) => {
+            const info_to_return = {
+              goal_title: goal.title,
+              goal_id: goal.goal_id,
+              successes: successes,
+            };
+            successes_by_goal.push(info_to_return);
+            if (goals.length === successes_by_goal.length) {
+              res.status(200).json(successes_by_goal);
+            }
+          })
+          .catch((err) => {
+            res.status(500).json({
+              error: err,
+              message: 'Failure to get successes given connection id',
+            });
+          });
+      }); // end of map
+    }) // end of then
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: "Failure to get user's goals",
+      });
+    }); // end of catch
 });
 
 // Get a success/fail entry for a given user/goal/date
