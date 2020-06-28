@@ -128,7 +128,7 @@ router.get('/:user_id/goals', restricted, (req, res) => {
           .catch((err) => {
             res.status(500).json({
               error: err,
-              message: 'Failure to get successes given connection id',
+              message: `Failure to get successes for user ${user_id}`,
             });
           });
       }); // end of map
@@ -136,7 +136,7 @@ router.get('/:user_id/goals', restricted, (req, res) => {
     .catch((err) => {
       res.status(500).json({
         error: err,
-        message: "Failure to get user's goals",
+        message: `Failure to get goals for user ${user_id} in preparation for getting user's success/fail entries, grouped by goal.`,
       });
     }); // end of catch
 });
