@@ -240,12 +240,15 @@ router.get('/:user_id/:goal_id/all', restricted, (req, res) => {
 router.get('/:user_id/:goal_id/stats', restricted, (req, res) => {
   const user_id = req.params.user_id;
   const goal_id = req.params.goal_id;
-  Successes.getCountSuccessesForUserAndGoal(user_id, goal_id)
+  Successes.getStatsForUserAndGoal(user_id, goal_id)
     .then((response) => {
       res.status(200).json({
         user_id: user_id,
         goal_id: goal_id,
-        total_successes: response[0]['total_successes'],
+        connection_created_or_oldest_entry_date: response.oldest_entry_date,
+        total_successes: response.num_successes,
+        number_of_days_with_goal: response.days_elapsed,
+        percentage_success: response.percentage,
       });
     })
     .catch((err) => {
