@@ -1,5 +1,6 @@
 module.exports = {
   connectGoalToUser,
+  getUsersGoal,
   getUsersGoals,
   getUsersGoalsByCategory,
   getUsersCategories,
@@ -17,6 +18,12 @@ function connectGoalToUser(user_id, goal_id) {
     .then(() => {
       return getUsersGoals(user_id);
     });
+}
+
+function getUsersGoal(user_id, goal_id) {
+  return db('connections')
+    .where({ user_id: user_id, goal_id: goal_id })
+    .first();
 }
 
 function getUsersGoals(user_id) {

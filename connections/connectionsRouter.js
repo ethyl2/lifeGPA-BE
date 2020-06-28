@@ -28,6 +28,21 @@ router.post('/:user_id/:goal_id', restricted, (req, res) => {
     });
 });
 
+// Get the connection between a user and a goal
+// GET /api/connections/:user_id/:goal_id
+router.get('/:user_id/:goal_id', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const goal_id = req.params.goal_id;
+  Connections.getUsersGoal(user_id, goal_id)
+    .then((response) => res.status(200).json(response))
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failure to get user/goal connection for user ${user_id} and goal ${goal_id}.`,
+      });
+    });
+});
+
 // Disconnect a user from a goal.
 // This returns the updated goals that are connected to a user.
 // DELETE /api/connections/:user_id/:goal_id
@@ -93,7 +108,7 @@ router.get('/:user_id/categories', restricted, (req, res) => {
 
 // Get a user's goals in specified category
 // Get /api/connections/:user_id/:category_id
-router.get('/:user_id/:category_id', restricted, (req, res) => {
+router.get('/:user_id/category/:category_id', restricted, (req, res) => {
   const user_id = req.params.user_id;
   const category_id = req.params.category_id;
   Connections.getUsersGoalsByCategory(user_id, category_id)
