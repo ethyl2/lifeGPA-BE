@@ -141,6 +141,64 @@ router.get('/:user_id/goals', restricted, (req, res) => {
     }); // end of catch
 });
 
+// Get all success/fail entries for a given user, grouped by category and goals within each category
+// GET /api/succcesses/:user_id/categories
+router.get('/:user_id/categories', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const organized_successes = [];
+  Connections.getUsersCategories(user_id).then((categories) => {
+    categories
+      .map((category) => {
+        const goals_for_category = [];
+        Connections.getUsersGoalsByCategory(user_id, category.category_id).then(
+          (goals) => {
+            goals
+              .map((goal) => {
+                Successes.getSuccessesGivenConnection(goal.connection_id)
+                  .then((successes) => {
+                    const goal_info = {
+                      goal_title: goal.title,
+                      goal_id: goal.goal_id,
+                      successes: successes,
+                    };
+                    goals_for_category.push(goal_info);
+                    if (goals_for_category.length === goals.length) {
+                      const category_info = {
+                        category_title: category.category_title,
+                        category_id: category.category_id,
+                        goals: goals_for_category,
+                      };
+                      organized_successes.push(category_info);
+                      if (organized_successes.length === categories.length) {
+                        res.status(200).json(organized_successes);
+                      }
+                    }
+                  })
+                  .catch((err) => {
+                    res.status(500).json({
+                      error: err,
+                      message: `Failure to get user ${user_id}'s success/fail entries.`,
+                    }); // ends catch for getSuccessesGivenConnection
+                  }); // ends mapping thru goals
+              }) // ends then for getUsersGoalsByCategory
+              .catch((err) => {
+                res.status(500).json({
+                  error: err,
+                  message: `Failure to get user ${user_id}'s goals by category.`,
+                });
+              }); // ends catch for getUsersGoalsByCategory
+          }
+        ); // ends mapping through categories
+      }) //ends the then for getUsersCategories
+      .catch((err) => {
+        res.status(500).json({
+          error: err,
+          message: `Failure to get user ${user_id}'s success/fail entries, organized by category.`,
+        });
+      });
+  });
+});
+
 // Get a success/fail entry for a given user/goal/date
 // GET /api/successes/:user_id/:goal_id
 
