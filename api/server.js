@@ -19,4 +19,10 @@ server.use('/api/goals', GoalsRouter);
 server.use('/api/categories', CategoriesRouter);
 server.use('/api/connections', ConnectionsRouter);
 server.use('/api/successes', SuccessesRouter);
+
+server.get('/api', (req, res) => {
+  res.status(200).json({
+    message: `API is up and running. 🏃‍♀️`,
+  });
+});
 module.exports = server;
