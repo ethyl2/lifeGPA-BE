@@ -8,7 +8,9 @@ module.exports = {
   getSuccessesForUserAndGoal,
   getSuccessesForUser,
   getCountSuccessesForUserAndGoal,
+  getCountSuccessesForUserAndGoalForTimePeriod,
   getStatsForUserAndGoal,
+  getStatsForUserAndGoalForTimePeriod,
   getOldestSuccessForUserAndGoal,
 };
 
@@ -110,4 +112,37 @@ async function getSuccessesForUser(user_id) {
   return db('connections')
     .where({ user_id: user_id })
     .join('successes', 'connections_id', '=', 'connections.id');
+}
+
+// To get stats for a given user/goal over specified time period (last x number of days)
+
+async function getStatsForUserAndGoalForTimePeriod(user_id, goal_id, num_days) {
+  const today = new Date();
+  const num_milliseconds = num_days * 1000 * 60 * 60 * 24;
+  const first_day = new Date(today - num_milliseconds);
+  const string_first_day = first_day.toISOString();
+  const connection = await getConnection(user_id, goal_id);
+  const total_successes = await getCountSuccessesForUserAndGoalForTimePeriod(
+    connection.id,
+    string_first_day
+  );
+  const num_successes = total_successes[0]['total_successes'];
+  const percentage = parseFloat(((100 * num_successes) / num_days).toFixed(2));
+  return {
+    total_successes: num_successes,
+    entries_since: first_day,
+    percentage_success: percentage,
+  };
+}
+
+// Helper function to get the count of successes for user/goal during time period (last x number of days)
+// Used in stats function above.
+async function getCountSuccessesForUserAndGoalForTimePeriod(
+  connections_id,
+  string_first_day
+) {
+  return db('successes')
+    .where({ connections_id, success: 1 })
+    .where('date', '>', string_first_day)
+    .count('id as total_successes');
 }
