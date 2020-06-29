@@ -7,7 +7,7 @@ const Categories = require('./categoriesModel.js');
 
 // GET api/categories/
 router.get('/', (req, res) => {
-  res.status(200).send('Welcome to the Categories Router! 🗃️');
+  res.status(200).json({ message: 'Welcome to the Categories Router! 🗃️' });
 });
 
 // GET /api/categories/all

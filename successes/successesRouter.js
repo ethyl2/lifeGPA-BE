@@ -5,7 +5,7 @@ const Successes = require('./successesModel.js');
 const Connections = require('../connections/connectionsModel.js');
 
 router.get('/', (req, res) => {
-  res.status(200).send('Welcome to the Successes Router! 🏆');
+  res.status(200).json({ message: 'Welcome to the Successes Router! 🏆' });
 });
 
 /* Accountability Endpoints */

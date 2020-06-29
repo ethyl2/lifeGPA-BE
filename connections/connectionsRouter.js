@@ -7,7 +7,7 @@ const Connections = require('./connectionsModel.js');
 /* User-Goal Connection Endpoints */
 
 router.get('/', (req, res) => {
-  res.status(200).send('Welcome to the Connections Router! ⛓️');
+  res.status(200).json({ message: 'Welcome to the Connections Router! ⛓️' });
 });
 
 // Connect a user to a goal.

@@ -8,7 +8,7 @@ require('dotenv').config();
 
 // GET /api/users
 router.get('/', (req, res) => {
-  res.status(200).send('Welcome to the Users Router! 🐣');
+  res.status(200).json({ message: 'Welcome to the Users Router! 🐣' });
 });
 
 // GET /api/users/all
