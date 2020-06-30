@@ -5,6 +5,9 @@ describe('API server', () => {
   it('runs the test', () => {
     expect(true).toBe(true);
   });
+  it('should use the testing environment', async function () {
+    await expect(process.env.DB_ENV).toBe('testing');
+  });
   it('should return 200 OK with JSON body', async function () {
     const api_response = await request(server).get('/api');
     expect(api_response.status).toBe(200);
