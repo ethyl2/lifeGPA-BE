@@ -260,6 +260,35 @@ router.get('/:user_id/:goal_id/stats/:num_days', restricted, (req, res) => {
     });
 });
 
+// To get the average percentage for a given user/category/time period:
+// GET /api/successes/:user_id/:category_id/category/:num_days
+router.get(
+  '/:user_id/:category_id/category/:num_days',
+  restricted,
+  (req, res) => {
+    const user_id = req.params.user_id;
+    const category_id = req.params.category_id;
+    const num_days = req.params.num_days;
+    Successes.getStatsForUserAndCategoryForTimePeriod(
+      user_id,
+      category_id,
+      num_days
+    )
+      .then((percentage) => {
+        res.status(200).json({
+          percentage: percentage,
+          message: 'Here is the average percentage for the given category',
+        });
+      })
+      .catch((err) => {
+        res.status(500).json({
+          error: err,
+          message: `Unable to get an average percentage of success for user ${user_id} with category ${category_id} and time period ${num_days} days.`,
+        });
+      });
+  }
+);
+
 // To get statistics for a given user with a given goal
 // GET /api/successes/:user_id/:goal_id/stats
 router.get('/:user_id/:goal_id/stats', restricted, (req, res) => {

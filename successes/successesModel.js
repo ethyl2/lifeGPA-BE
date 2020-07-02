@@ -12,8 +12,9 @@ module.exports = {
   getStatsForUserAndGoal,
   getStatsForUserAndGoalForTimePeriod,
   getOldestSuccessForUserAndGoal,
+  getStatsForUserAndCategoryForTimePeriod,
 };
-
+const Connections = require('../connections/connectionsModel.js');
 const db = require('../data/db-config.js');
 
 function getConnection(user_id, goal_id) {
@@ -145,4 +146,44 @@ async function getCountSuccessesForUserAndGoalForTimePeriod(
     .where({ connections_id, success: 1 })
     .where('date', '>', string_first_day)
     .count('id as total_successes');
+}
+
+// To get stats for a given user in a given category in a given time period:
+// First, get user's goals in the given category
+// Then get stats for each goal for given time period
+// Then find the average of all of the percentages
+
+async function getStatsForUserAndCategoryForTimePeriod(
+  user_id,
+  category_id,
+  num_days
+) {
+  return Connections.getUsersGoalsByCategory(user_id, category_id)
+    .then((goals) => {
+      const percentages = [];
+      goals.map((goal) => {
+        goal_stats = getStatsForUserAndGoalForTimePeriod(
+          user_id,
+          goal.goal_id,
+          num_days
+        )
+          .then((goal_stats) => {
+            percentages.push(goal_stats.percentage_success);
+            if (percentages.length === goals.length) {
+              const total = percentages.reduce((acc, cur) => acc + cur);
+              const average = total / percentages.length;
+              console.log(
+                `Percentages: ${percentages} Total: ${total} Avg: ${average}`
+              );
+              return average;
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 }

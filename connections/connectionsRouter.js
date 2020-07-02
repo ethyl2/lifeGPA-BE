@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const restricted = require('../auth/authMiddleware.js');
-const Goals = require('../goals/goalsModel.js');
 const Connections = require('./connectionsModel.js');
 
 /* User-Goal Connection Endpoints */
@@ -118,7 +117,7 @@ router.get('/:user_id', restricted, (req, res) => {
 });
 
 // Get all of the categories of a user's goals
-// GET /api/connections/:user_id/categories
+// GET /api/connections/:user_id/categories/all
 router.get('/:user_id/categories/all', restricted, (req, res) => {
   const user_id = req.params.user_id;
   Connections.getUsersCategories(user_id)
