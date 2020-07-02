@@ -13,20 +13,47 @@ router.get('/', (req, res) => {
 // Connect a user to a goal.
 // This returns all of a user's goals. <- Change this later to only return new connection if desired.
 // POST /api/connections/:user_id/:goal_id
-router.post('/:user_id/:goal_id', restricted, (req, res) => {
+router.post(
+  '/:user_id/:goal_id',
+  restricted,
+  checkForDuplicateConnection,
+  (req, res) => {
+    const user_id = req.params.user_id;
+    const goal_id = req.params.goal_id;
+    Connections.connectGoalToUser(user_id, goal_id)
+      .then((goals) => {
+        res.status(201).json(goals);
+      })
+      .catch((err) => {
+        res.status(500).json({
+          error: err,
+          message: `Failed to add goal with id ${goal_id} to user with id ${user_id}`,
+        });
+      });
+  }
+);
+
+// Helper function to check that the connection between a user and goal doesn't already exist,
+// to be used before creating a connection
+
+function checkForDuplicateConnection(req, res, next) {
   const user_id = req.params.user_id;
   const goal_id = req.params.goal_id;
-  Connections.connectGoalToUser(user_id, goal_id)
-    .then((goals) => {
-      res.status(201).json(goals);
+  Connections.getUsersGoal(user_id, goal_id)
+    .then((connection) => {
+      if (connection) {
+        res.status(500).json({
+          message: 'The connection for specified user/goal already exists.',
+          existing_entry: connection,
+        });
+      } else {
+        next();
+      }
     })
     .catch((err) => {
-      res.status(500).json({
-        error: err,
-        message: `Failed to add goal with id ${goal_id} to user with id ${user_id}`,
-      });
+      console.log(err);
     });
-});
+}
 
 // Get the connection between a user and a goal
 // GET /api/connections/:user_id/:goal_id
