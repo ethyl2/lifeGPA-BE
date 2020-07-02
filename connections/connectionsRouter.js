@@ -119,7 +119,7 @@ router.get('/:user_id', restricted, (req, res) => {
 
 // Get all of the categories of a user's goals
 // GET /api/connections/:user_id/categories
-router.get('/:user_id/categories', restricted, (req, res) => {
+router.get('/:user_id/categories/all', restricted, (req, res) => {
   const user_id = req.params.user_id;
   Connections.getUsersCategories(user_id)
     .then((categories) => {
