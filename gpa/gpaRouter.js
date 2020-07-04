@@ -4,11 +4,65 @@ const restricted = require('../auth/authMiddleware.js');
 const Successes = require('../successes/successesModel.js');
 const Connections = require('../connections/connectionsModel.js');
 
-/* Endpoints dealing with stats & percentages */
+/* All endpoints dealing with stats & percentages */
 
 router.get('/', (req, res) => {
   res.status(200).json({ message: 'Welcome to the GPA Router! 🧮' });
 });
+
+/* First, endpoints dealing with a given goal */
+
+// To get statistics for a given user with a given goal
+// GET /api/gpa/:user_id/goal/:goal_id
+router.get('/:user_id/goal/:goal_id', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const goal_id = req.params.goal_id;
+  Successes.getStatsForUserAndGoal(user_id, goal_id)
+    .then((response) => {
+      res.status(200).json({
+        percentage_success: response.percentage,
+        total_successes: response.num_successes,
+        user_id: user_id,
+        goal_id: goal_id,
+        connection_created_or_oldest_entry_date: response.oldest_entry_date,
+        number_of_days_with_goal: response.days_elapsed,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failure to get goal stats for user ${user_id} with goal ${goal_id}.`,
+      });
+    });
+});
+
+// To get statistics for a given user with a given goal over the time period specified (the last x number of days)
+// GET /api/gpa/:user_id/goal/:goal_id/:num_days
+router.get('/:user_id/goal/:goal_id/:num_days', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const goal_id = req.params.goal_id;
+  const num_days = req.params.num_days;
+  Successes.getStatsForUserAndGoalForTimePeriod(user_id, goal_id, num_days)
+    .then((response) => {
+      res.status(200).json({
+        percentage_success: response.percentage_success,
+        user_id: user_id,
+        goal_id: goal_id,
+        num_days_checked: num_days,
+        entries_since: response.entries_since,
+        total_successes: response.total_successes,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failed to get stats for user ${user_id}, goal ${goal_id} for last ${num_days} days.`,
+      });
+    });
+});
+
+/* ------------------------------------------------------- */
+/* Next, endpoints dealing with a given category */
 
 // To get the average percentage of success for a given user/category:
 // GET /api/gpa/:user_id/:category_id/
