@@ -271,6 +271,11 @@ router.get(
     const num_days = req.params.num_days;
     Connections.getUsersGoalsByCategory(user_id, category_id)
       .then((goals) => {
+        if (goals.length == 0) {
+          res.status(500).json({
+            message: `User ${user_id} has no goals in category ${category_id}.`,
+          });
+        }
         const percentages = [];
         goals.map((goal) => {
           let category_title = goal.category_title;
