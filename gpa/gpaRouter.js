@@ -61,13 +61,159 @@ router.get('/:user_id/goal/:goal_id/:num_days', restricted, (req, res) => {
     });
 });
 
+/* --------------------------------------------------------------------------------------------*/
+/* Next, the endpoints that return the overall percentage of success -- aka the Life GPA! */
+
+// Get the overall average success percentage of all of the user's categories.
+// GET /api/gpa/:user_id
+router.get('/:user_id', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const category_averages = [];
+  const category_ids = [];
+  Connections.getUsersCategories(user_id)
+    .then((categories) => {
+      if (categories.length == 0) {
+        res.status(500).json({
+          message: `User ${user_id} does not exist, or doesn't have any goals in categories yet.`,
+        }); // end of json
+      } // end of if block
+      categories.map((category) => {
+        category_ids.push(category.category_id);
+        const goals_percentages = [];
+        Connections.getUsersGoalsByCategory(user_id, category.category_id)
+          .then((goals) => {
+            goals.map((goal) => {
+              Successes.getStatsForUserAndGoal(user_id, goal.goal_id)
+                .then((goal_stats) => {
+                  goals_percentages.push(goal_stats.percentage);
+
+                  if (goals_percentages.length === goals.length) {
+                    const total = goals_percentages.reduce(
+                      (acc, cur) => acc + cur
+                    );
+                    const category_average = total / goals_percentages.length;
+                    category_averages.push(category_average);
+                    if (category_averages.length == categories.length) {
+                      console.log(category_averages);
+                      const overall_total = category_averages.reduce(
+                        (acc, cur) => acc + cur
+                      );
+                      const overall_average = (
+                        overall_total / category_averages.length
+                      ).toFixed(2);
+                      res.status(200).json({
+                        overall_average_success: overall_average,
+                        category_averages: category_averages,
+                        category_ids: category_ids,
+                      }); // end json
+                    } // end of inner if block
+                  } // end of outer if block
+                }) // end of then
+                .catch((err) => {
+                  res.status(500).json({
+                    error: err,
+                    message: `Unable to get goal stats for user ${user_id} and goal ${goal.goal_id}.`,
+                  }); // end of json
+                }); // end of catch
+            }); // end of mapping through goals
+          }) // end of then
+          .catch((err) => {
+            res.status(500).json({
+              error: err,
+              message: `Failure to get goals in category ${category.category_id}`,
+            }); // end of json
+          }); // end of catch
+      }); // end of mapping through categories
+    }) // end of then
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failed to get user ${user_id}'s categories.`,
+      }); // end of json
+    }); // end of catch
+});
+
+// Get the overall average success percentage of all of the user's categories for a given time period (last x number of days)
+// GET /api/gpa/:user_id/:num_days
+router.get('/:user_id/:num_days', restricted, (req, res) => {
+  const user_id = req.params.user_id;
+  const num_days = req.params.num_days;
+  const category_averages = [];
+  const category_ids = [];
+  Connections.getUsersCategories(user_id)
+    .then((categories) => {
+      if (categories.length == 0) {
+        res.status(500).json({
+          message: `User ${user_id} does not exist, or doesn't have any goals in categories yet.`,
+        }); // end of json
+      } // end of if block
+      categories.map((category) => {
+        category_ids.push(category.category_id);
+        const goals_percentages = [];
+        Connections.getUsersGoalsByCategory(user_id, category.category_id)
+          .then((goals) => {
+            goals.map((goal) => {
+              Successes.getStatsForUserAndGoalForTimePeriod(
+                user_id,
+                goal.goal_id,
+                num_days
+              )
+                .then((goal_stats) => {
+                  goals_percentages.push(goal_stats.percentage_success);
+
+                  if (goals_percentages.length === goals.length) {
+                    const total = goals_percentages.reduce(
+                      (acc, cur) => acc + cur
+                    );
+                    const category_average = total / goals_percentages.length;
+                    category_averages.push(category_average);
+                    if (category_averages.length == categories.length) {
+                      const overall_total = category_averages.reduce(
+                        (acc, cur) => acc + cur
+                      );
+                      const overall_average = (
+                        overall_total / category_averages.length
+                      ).toFixed(2);
+                      res.status(200).json({
+                        overall_average_success: overall_average,
+                        category_averages: category_averages,
+                        category_ids: category_ids,
+                        num_days: num_days,
+                      }); // end json
+                    } // end of inner if block
+                  } // end of outer if block
+                }) // end of then
+                .catch((err) => {
+                  res.status(500).json({
+                    error: err,
+                    message: `Unable to get goal stats for user ${user_id} and goal ${goal.goal_id} for ${num_days} days.`,
+                  }); // end of json
+                }); // end of catch
+            }); // end of mapping through goals
+          }) // end of then
+          .catch((err) => {
+            res.status(500).json({
+              error: err,
+              message: `Failure to get goals in category ${category.category_id}`,
+            }); // end of json
+          }); // end of catch
+      }); // end of mapping through categories
+    }) // end of then
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+        message: `Failed to get user ${user_id}'s categories.`,
+      }); // end of json
+    }); // end of catch
+});
+
 /* ------------------------------------------------------- */
-/* Next, endpoints dealing with a given category */
+/* Finally, endpoints dealing with a given category */
 
 // To get the average percentage of success for a given user/category:
-// GET /api/gpa/:user_id/:category_id/
+// GET /api/gpa/:user_id/category/:category_id/
 router.get(
-  '/:user_id/:category_id/',
+  '/:user_id/category/:category_id/',
   restricted,
   (req, res) => {
     const user_id = req.params.user_id;
@@ -180,76 +326,5 @@ router.get(
       });
   } // end of arrow function
 ); // end of router.get
-
-/* --------------------------------------------------------------------------------------------*/
-/* Finally, the endpoints that return the overall percentage of success -- aka the Life GPA! */
-
-// Get the pverall average success percentage of all of the user's categories.
-router.get('/:user_id', (req, res) => {
-  const user_id = req.params.user_id;
-  const category_averages = [];
-  const category_ids = [];
-  Connections.getUsersCategories(user_id)
-    .then((categories) => {
-      if (categories.length == 0) {
-        res.status(500).json({
-          message: `User ${user_id} does not exist, or doesn't have any goals in categories yet.`,
-        }); // end of json
-      } // end of if block
-      categories.map((category) => {
-        category_ids.push(category.category_id);
-        const goals_percentages = [];
-        Connections.getUsersGoalsByCategory(user_id, category.category_id)
-          .then((goals) => {
-            goals.map((goal) => {
-              Successes.getStatsForUserAndGoal(user_id, goal.goal_id)
-                .then((goal_stats) => {
-                  goals_percentages.push(goal_stats.percentage);
-
-                  if (goals_percentages.length === goals.length) {
-                    const total = goals_percentages.reduce(
-                      (acc, cur) => acc + cur
-                    );
-                    const category_average = total / goals_percentages.length;
-                    category_averages.push(category_average);
-                    if (category_averages.length == categories.length) {
-                      console.log(category_averages);
-                      const overall_total = category_averages.reduce(
-                        (acc, cur) => acc + cur
-                      );
-                      const overall_average = (
-                        overall_total / category_averages.length
-                      ).toFixed(2);
-                      res.status(200).json({
-                        overall_average_success: overall_average,
-                        category_averages: category_averages,
-                        category_ids: category_ids,
-                      }); // end json
-                    } // end of inner if block
-                  } // end of outer if block
-                }) // end of then
-                .catch((err) => {
-                  res.status(500).json({
-                    error: err,
-                    message: `Unable to get goal stats for user ${user_id} and goal ${goal.goal_id}.`,
-                  }); // end of json
-                }); // end of catch
-            }); // end of mapping through goals
-          }) // end of then
-          .catch((err) => {
-            res.status(500).json({
-              error: err,
-              message: `Failure to get goals in category ${category.category_id}`,
-            }); // end of json
-          }); // end of catch
-      }); // end of mapping through categories
-    }) // end of then
-    .catch((err) => {
-      res.status(500).json({
-        error: err,
-        message: `Failed to get user ${user_id}'s categories.`,
-      }); // end of json
-    }); // end of catch
-});
 
 module.exports = router;
