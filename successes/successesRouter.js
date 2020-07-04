@@ -255,7 +255,7 @@ router.get('/:user_id/:goal_id/stats/:num_days', restricted, (req, res) => {
     .catch((err) => {
       res.status(500).json({
         error: err,
-        message: `Failed to get status for user ${user_id}, goal ${goal_id} for last ${num_days} days.`,
+        message: `Failed to get stats for user ${user_id}, goal ${goal_id} for last ${num_days} days.`,
       });
     });
 });
@@ -269,25 +269,49 @@ router.get(
     const user_id = req.params.user_id;
     const category_id = req.params.category_id;
     const num_days = req.params.num_days;
-    Successes.getStatsForUserAndCategoryForTimePeriod(
-      user_id,
-      category_id,
-      num_days
-    )
-      .then((percentage) => {
-        res.status(200).json({
-          percentage: percentage,
-          message: 'Here is the average percentage for the given category',
-        });
-      })
+    Connections.getUsersGoalsByCategory(user_id, category_id)
+      .then((goals) => {
+        const percentages = [];
+        goals.map((goal) => {
+          let category_title = goal.category_title;
+          Successes.getStatsForUserAndGoalForTimePeriod(
+            user_id,
+            goal.goal_id,
+            num_days
+          )
+            .then((goal_stats) => {
+              percentages.push(goal_stats.percentage_success);
+              if (percentages.length === goals.length) {
+                const total = percentages.reduce((acc, cur) => acc + cur);
+                const average = total / percentages.length;
+                res.status(200).json({
+                  average_percentage: average,
+                  category: category_id,
+                  category_title: category_title,
+                  goal_percentages: percentages,
+                  user_id: user_id,
+                  num_days_checked: num_days,
+                  message: `In the past ${num_days} days, user ${user_id}'s average success percentage for goals in the category ${category_title} (which has the category_id of ${category_id}) is ${average}%.`,
+                });
+              } // end of if block
+            }) // end of inner then
+            .catch((err) => {
+              res.status(500).json({
+                error: err,
+                message: `Failed to get stats for user ${user_id}, goal ${goal.goal_id} for last ${num_days} days.`,
+              }); // end of json
+            }); // end of inner catch
+        }); // end of map
+      }) // end of outer then
+
       .catch((err) => {
         res.status(500).json({
           error: err,
           message: `Unable to get an average percentage of success for user ${user_id} with category ${category_id} and time period ${num_days} days.`,
-        });
+        }); // end of json
       });
-  }
-);
+  } // end of arrow function
+); // end of router.get
 
 // To get statistics for a given user with a given goal
 // GET /api/successes/:user_id/:goal_id/stats
