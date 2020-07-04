@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
 
 /* Accountability Endpoints */
 
-// Add a success (to show whether a user did a specified goal on a specified date)
+// Add a success entry (to show whether a user did a specified goal on a specified date)
 
 // POST /api/successes/:user_id/:goal_id
 // Success is a boolean
@@ -235,6 +235,8 @@ router.get('/:user_id/:goal_id/all', restricted, (req, res) => {
     });
 });
 
+/* Endpoints dealing with stats & percentages */
+
 // To get statistics for a given user with a given goal over the time period specified (the last x number of days)
 // GET /api/successes/:user_id/:goal_id/stats/:num_days
 router.get('/:user_id/:goal_id/stats/:num_days', restricted, (req, res) => {
@@ -260,7 +262,7 @@ router.get('/:user_id/:goal_id/stats/:num_days', restricted, (req, res) => {
     });
 });
 
-// To get the average percentage for a given user/category/time period:
+// To get the average percentage of success for a given user/category/time period:
 // GET /api/successes/:user_id/:category_id/category/:num_days
 router.get(
   '/:user_id/:category_id/category/:num_days',

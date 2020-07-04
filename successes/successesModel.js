@@ -13,7 +13,7 @@ module.exports = {
   getStatsForUserAndGoalForTimePeriod,
   getOldestSuccessForUserAndGoal,
 };
-const Connections = require('../connections/connectionsModel.js');
+
 const db = require('../data/db-config.js');
 
 function getConnection(user_id, goal_id) {
@@ -88,10 +88,8 @@ async function getStatsForUserAndGoal(user_id, goal_id) {
   const oldest_entry = await getOldestSuccessForUserAndGoal(user_id, goal_id);
   let oldest_entry_date;
   if (oldest_entry[0]['min(`date`)']) {
-    console.log('here');
     oldest_entry_date = new Date(oldest_entry[0]['min(`date`)']);
   } else {
-    console.log('here instead');
     oldest_entry_date = new Date(connection.created_at);
   }
 
